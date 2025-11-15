@@ -1,2 +1,2 @@
-# tosp
-Terms of Service and Privacy Policy of the bot nite
+# Nite
+This is the website for the discord bot called "Nite".
