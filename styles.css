@@ -1,0 +1,78 @@
+.body {
+    background-color: #ffffff;
+    z-index: 0;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+}
+.site-header {
+    position: relative;
+    width: 100%;
+    padding: 20px 0;
+}
+.tryBtn {
+    color: #000000;
+    background-image: linear-gradient(90deg, cyan, rgb(45, 150, 182), cyan);
+    text-align: center;
+    width: fit-content;
+    padding: 10px 20px;
+    border-radius: 11px;
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    display: block;
+    user-select: none;
+    font-family: 'Inter', sans-serif;
+    font-weight: 300;
+    transform: scale(1);
+    transition: color 0.2s, transform 0.2s, background-position-x 14s linear;
+    background-size: 200%;
+}
+.tryBtn:hover {
+    transform: scale(1.2);
+    cursor: pointer;
+    background-position-x: 500px;
+}
+.niteTitle {
+    text-align: center;
+    position: relative;
+    font-size: 40px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 800;
+    margin: 60px 0 40px 0;
+}
+.cards-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 20px;
+    justify-content: center;
+}
+.card {
+    background: linear-gradient(135deg, #c0d9ff 0%, #e3e9f0 100%);
+    border-radius: 20px;
+    padding: 30px;
+    width: 300px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.3s;
+    font-family: 'Inter', sans-serif;
+    transform-style: preserve-3d;
+}
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+}
+.card-title {
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 12px;
+    color: #2d96b6;
+}
+.card-description {
+    font-size: 16px;
+    font-weight: 300;
+    color: #333;
+    line-height: 1.6;
+}
