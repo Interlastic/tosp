@@ -22,7 +22,7 @@
             // Calculate rotation angles
             const rotateY = Math.max(Math.min(deltaX * 3, maxOffset), -maxOffset);
             const rotateX = Math.min(Math.max(-deltaY * 3, -maxOffset), maxOffset);
-
+            console.log('rotateX:', rotateX, 'rotateY:', rotateY);
             card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(${1 + (1 - Math.min(Math.sqrt(deltaX * deltaX + deltaY * deltaY) / 2.5, 1)) * 0.1})`;        
         }
     }
