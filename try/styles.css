@@ -227,6 +227,7 @@
 
 .niteoutput {
     width: fit-content;
+    max-width: 80vw;
     font-family: 'Inter', sans-serif;
     background-color: #667eea;
     border-radius: 10px;
@@ -235,6 +236,8 @@
     max-width: 80%;
     transform-origin: left center;
     animation: outputBoxIdle 2s forwards infinite linear;
+    white-space: pre-wrap;
+    word-break: break-word
 }
 
 @keyframes outputBoxIdle {
