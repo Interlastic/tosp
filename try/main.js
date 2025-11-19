@@ -172,8 +172,15 @@
     const pageWrapper = document.getElementById("pageWrapper");
     tryBtn.addEventListener("click", {
         handleEvent() {
-            pageWrapper.classList.add("slide-left");
+            pageWrapper.classList.add("slide-right");
             setTimeout(() => { window.location.pathname = '/'; }, 1000);
+        }        
+    });
+    const viewAll = document.getElementById("viewAll");
+    viewAll.addEventListener("click", {
+        handleEvent() {
+            pageWrapper.classList.add("slide-up");
+            setTimeout(() => { window.location.pathname = '/commands'; }, 1000);
         }        
     });
 })();
