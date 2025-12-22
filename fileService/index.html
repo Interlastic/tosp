@@ -2,196 +2,297 @@
 <html>
 <head>
   <meta charset="utf-8" />
-  <title>Nite File Space — Demo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nite File Space</title>
   <style>
-    body{font-family:system-ui,Segoe UI,Roboto,Arial;max-width:760px;margin:48px auto;padding:12px}
-    button,input{margin:8px 0;padding:8px 12px;font-size:15px}
-    #user{margin:8px 0;padding:10px;background:#f6f7fb;border-radius:8px}
-    pre{background:#111;color:#0f0;padding:12px;border-radius:6px;overflow:auto}
+    :root { --primary: #5865F2; --bg: #f9f9f9; --card: #fff; --border: #e0e0e0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); margin: 0; padding: 20px; color: #333; }
+    
+    /* Layout Framework */
+    .app-container { max-width: 1000px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
+    .header { display: flex; justify-content: space-between; align-items: center; background: var(--card); padding: 15px 20px; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+    .main-grid { display: grid; grid-template-columns: 1fr; gap: 20px; }
+    
+    /* Desktop Split (Tablet+) */
+    @media (min-width: 768px) {
+      .main-grid { grid-template-columns: 1fr 1fr; align-items: start; }
+    }
+
+    /* Cards */
+    .card { background: var(--card); padding: 20px; border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 2px 8px rgba(0,0,0,0.03); }
+    .card h3 { margin-top: 0; border-bottom: 2px solid var(--bg); padding-bottom: 10px; display: flex; justify-content: space-between; }
+    
+    /* Components */
+    button { background: var(--primary); color: white; border: none; padding: 10px 16px; border-radius: 6px; cursor: pointer; font-weight: 500; transition: opacity 0.2s; }
+    button:hover { opacity: 0.9; }
+    button.secondary { background: #eee; color: #333; }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+    
+    input[type="file"] { width: 100%; margin: 10px 0; padding: 10px; background: var(--bg); border-radius: 6px; }
+    
+    /* File List */
+    .file-list { max-height: 500px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
+    .file-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; background: var(--bg); border-radius: 6px; border: 1px solid transparent; }
+    .file-item:hover { border-color: #ddd; background: #fff; }
+    .file-name { font-size: 14px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 60%; }
+    
+    /* Debug Console */
+    #debug { background: #1e1e1e; color: #0f0; padding: 15px; border-radius: 8px; font-family: monospace; font-size: 12px; height: 100px; overflow: auto; margin-top: 20px; }
+    .status-badge { font-size: 12px; padding: 4px 8px; border-radius: 12px; background: #eee; }
+    .status-badge.online { background: #d1fae5; color: #065f46; }
   </style>
 </head>
 <body>
-  <h1>Nite File Space — Demo</h1>
-  <div id="auth">
-    <button id="loginBtn">Login with Discord</button>
-    <div id="user" style="display:none">
-      <strong id="who"></strong>
-      <button id="logoutBtn">Logout</button>
+
+<div class="app-container">
+  <div class="header">
+    <h2 style="margin:0">Nite File Space</h2>
+    <div id="authSection">
+      <button id="loginBtn">Login with Discord</button>
+      <div id="userProfile" style="display:none; align-items:center; gap:10px">
+        <span id="username" style="font-weight:600"></span>
+        <button id="logoutBtn" class="secondary" style="padding:6px 12px; font-size:13px">Logout</button>
+      </div>
     </div>
   </div>
 
-  <hr/>
+  <div class="main-grid">
+    <div class="card">
+      <h3>Upload File</h3>
+      <div id="uploadZone" style="display:none">
+        <p style="color:#666; font-size:14px; margin-bottom:15px">Select a file to chunk and upload securely.</p>
+        <input type="file" id="fileInput" />
+        <button id="uploadBtn" style="width:100%; margin-top:10px">Upload to Cloud</button>
+        <div id="uploadStatus" style="margin-top:15px; font-size:14px; min-height:20px"></div>
+      </div>
+      <div id="loginPrompt" style="text-align:center; padding:20px; color:#888;">
+        Please login to upload files.
+      </div>
+    </div>
 
-  <div id="uploader" style="display:none">
-    <input type="file" id="fileInput"/>
-    <br/>
-    <button id="uploadBtn">Upload</button>
-    <div id="result"></div>
+    <div class="card">
+      <h3>
+        Recent Files 
+        <button id="refreshBtn" class="secondary" style="font-size:11px; padding:4px 8px">Refresh</button>
+      </h3>
+      <div id="fileList" class="file-list">
+        <div style="text-align:center; padding:20px; color:#aaa">No files found</div>
+      </div>
+    </div>
   </div>
-  
-  <div id="getfiles" style="">
-    <button id="filesbtn">Get Files</button>
-   </div>
 
-  <hr/>
-  <h3>Debug</h3>
-  <pre id="debug">Not logged in.</pre>
-	
-  <div id="files"></div>
+  <pre id="debug">System Ready.</pre>
+</div>
+
 <script>
-const WORKER_BASE = "https://nites-file-space.nite-87d.workers.dev";
-const OAUTH_START = WORKER_BASE + "/oauth/start";
-const UPLOAD_ENDPOINT = WORKER_BASE + "/upload";
-const GET_ENDPOINT = WORKER_BASE + "/get_files";
-const DOWNLOAD_ENDPOINT = WORKER_BASE + "/download";
+const API = "https://nites-file-space.nite-87d.workers.dev";
+const ENDPOINTS = {
+  auth: `${API}/oauth/start`,
+  upload: `${API}/upload`,
+  list: `${API}/get_files`,
+  download: `${API}/download`
+};
 
-const loginBtn = document.getElementById("loginBtn");
-const logoutBtn = document.getElementById("logoutBtn");
-const fileInput = document.getElementById("fileInput");
-const uploadBtn = document.getElementById("uploadBtn");
-const debug = document.getElementById("debug");
-const userBox = document.getElementById("user");
-const who = document.getElementById("who");
-const uploader = document.getElementById("uploader");
-const resultDiv = document.getElementById("result");
-const filesBtn = document.getElementById("filesbtn");
-const filesDiv = document.getElementById("files");
+// --- DOM Elements ---
+const $ = (id) => document.getElementById(id);
+const ui = {
+  loginBtn: $("loginBtn"),
+  logoutBtn: $("logoutBtn"),
+  userProfile: $("userProfile"),
+  username: $("username"),
+  uploadZone: $("uploadZone"),
+  loginPrompt: $("loginPrompt"),
+  fileInput: $("fileInput"),
+  uploadBtn: $("uploadBtn"),
+  uploadStatus: $("uploadStatus"),
+  fileList: $("fileList"),
+  refreshBtn: $("refreshBtn"),
+  debug: $("debug")
+};
 
-function log(s){ debug.textContent = typeof s === "string" ? s : JSON.stringify(s, null, 2); }
+// --- State & Storage ---
+let pollTimer = null;
+const store = {
+  get: () => localStorage.getItem("nite_token"),
+  set: (t) => localStorage.setItem("nite_token", t),
+  clear: () => localStorage.removeItem("nite_token")
+};
 
-function currentToken(){ return localStorage.getItem("nite_token"); }
-function setToken(t){ localStorage.setItem("nite_token", t); }
-function clearToken(){ localStorage.removeItem("nite_token"); }
+const log = (msg) => {
+  const text = typeof msg === "object" ? JSON.stringify(msg) : msg;
+  ui.debug.textContent = `> ${text}\n${ui.debug.textContent}`;
+};
 
-function updateUI() {
-  const t = currentToken();
-  if (t) {
-    userBox.style.display = "block";
-    uploader.style.display = "block";
-    loginBtn.style.display = "none";
-    who.textContent = "Logged in (session token present)";
-    log("Ready to upload. Session token present.");
+// --- Authentication ---
+function updateAuthState() {
+  const token = store.get();
+  const isLoggedIn = !!token;
+  
+  ui.loginBtn.style.display = isLoggedIn ? "none" : "block";
+  ui.userProfile.style.display = isLoggedIn ? "flex" : "none";
+  ui.uploadZone.style.display = isLoggedIn ? "block" : "none";
+  ui.loginPrompt.style.display = isLoggedIn ? "none" : "block";
+  
+  if (isLoggedIn) {
+    ui.username.textContent = "User Active"; 
+    ui.username.className = "status-badge online";
+    startPolling();
   } else {
-    userBox.style.display = "none";
-    uploader.style.display = "none";
-    loginBtn.style.display = "inline-block";
-    log("Not logged in.");
+    stopPolling();
+    ui.fileList.innerHTML = '<div style="text-align:center; padding:20px; color:#aaa">Login to view files</div>';
   }
 }
 
-loginBtn.addEventListener("click", () => {
-  const popup = window.open(OAUTH_START, "discord_oauth", "width=500,height=800");
-  if (!popup) { alert("Popup blocked — allow popups for this site."); return; }
-
-  function onMessage(e) {
-    try {
-      const data = e.data;
-      if (!data || data.type !== "discord_oauth") return;
-      if (data.token) {
-        setToken(data.token);
-        log({ event: "oauth_success", user: data.user });
-        updateUI();
-      }
-    } catch (err) {
-      console.error(err);
-    } finally {
-      window.removeEventListener("message", onMessage);
+ui.loginBtn.onclick = () => {
+  const popup = window.open(ENDPOINTS.auth, "discord_oauth", "width=500,height=800");
+  if (!popup) return alert("Enable popups");
+  
+  window.onmessage = (e) => {
+    if (e.data?.type === "discord_oauth" && e.data.token) {
+      store.set(e.data.token);
+      log("Auth Success");
+      updateAuthState();
     }
-  }
-  window.addEventListener("message", onMessage);
-});
+  };
+};
 
-logoutBtn.addEventListener("click", () => {
-  clearToken();
-  updateUI();
-  log("Logged out.");
-});
+ui.logoutBtn.onclick = () => {
+  store.clear();
+  updateAuthState();
+};
 
-uploadBtn.addEventListener("click", async () => {
-  const f = fileInput.files[0];
-  if (!f) { alert("Pick a file first"); return; }
-  const token = currentToken();
-  if (!token) { alert("Not logged in"); return; }
+// --- File Operations ---
+ui.uploadBtn.onclick = async () => {
+  const file = ui.fileInput.files[0];
+  const token = store.get();
+  if (!file || !token) return;
 
-  log("Uploading " + f.name + " (" + f.size + " bytes)...");
-  resultDiv.textContent = "";
+  ui.uploadBtn.disabled = true;
+  ui.uploadBtn.textContent = "Uploading...";
+  ui.uploadStatus.textContent = "Starting upload stream...";
 
   const form = new FormData();
-  form.append("file", f);
+  form.append("file", file);
 
   try {
-    const resp = await fetch(UPLOAD_ENDPOINT, {
+    const res = await fetch(ENDPOINTS.upload, {
       method: "POST",
       headers: { "x-session-token": token },
       body: form
     });
-    const j = await resp.json();
-    if (!resp.ok) {
-      log({ error: j });
-      resultDiv.textContent = "Upload failed: " + JSON.stringify(j);
+    const data = await res.json();
+    
+    if (res.ok) {
+      log(`Uploaded: ${file.name}`);
+      ui.uploadStatus.innerHTML = `<span style="color:green">✔ Success</span>`;
+      ui.fileInput.value = ""; // clear input
+      fetchFiles(); // instant refresh
     } else {
-      log({ success: j });
-      resultDiv.textContent = "Uploaded: " + JSON.stringify(j);
+      throw new Error(data.error || "Upload failed");
     }
   } catch (e) {
-    log("Upload error: " + e);
-    resultDiv.textContent = "Upload error: " + e;
+    ui.uploadStatus.innerHTML = `<span style="color:red">✘ ${e.message}</span>`;
+    log(e.message);
+  } finally {
+    ui.uploadBtn.disabled = false;
+    ui.uploadBtn.textContent = "Upload to Cloud";
   }
-});
+};
 
-filesBtn.addEventListener("click", async () => {
-  const token = currentToken();
-  if (!token) { alert("Not logged in"); return; }
+async function fetchFiles() {
+  const token = store.get();
+  if (!token) return;
 
-  const resp = await fetch(GET_ENDPOINT, {
-    method: "GET",
-    headers: { "x-session-token": token }
+  try {
+    const res = await fetch(ENDPOINTS.list, { headers: { "x-session-token": token } });
+    if (!res.ok) return; // Silent fail on polling errors
+    
+    const files = await res.json();
+    renderFiles(files);
+  } catch (e) {
+    console.error("Poll error", e);
+  }
+}
+
+function renderFiles(list) {
+  if (!list || list.length === 0) {
+    ui.fileList.innerHTML = '<div style="text-align:center; padding:20px; color:#aaa">No files yet</div>';
+    return;
+  }
+
+  // Simple diff: Only redraw if count changes (for demo smoothness)
+  // In production, check IDs.
+  if (ui.fileList.childElementCount === list.length) return;
+
+  ui.fileList.innerHTML = "";
+  list.forEach(file => {
+    const el = document.createElement("div");
+    el.className = "file-item";
+    el.innerHTML = `
+      <div class="file-name" title="${file.name}">${file.name}</div>
+      <button class="secondary" onclick="downloadFile('${file.index || file.fileId}', '${file.name}')">Download</button>
+    `;
+    ui.fileList.appendChild(el);
   });
+}
 
-  const j = await resp.json();
-  if (resp.ok) {
-    debug.textContent = "Got: " + JSON.stringify(j, null, 2);
-    filesDiv.innerHTML = ""; // clear previous
-
-    for (const file of j) {
-      const newDiv = document.createElement("div");
-      newDiv.textContent = file.name + " ";
-
-      const downloadBtn = document.createElement("button");
-      downloadBtn.textContent = "Download";
-      downloadBtn.addEventListener("click", () => {
-        const token = currentToken();
-        if (!token) { alert("Not logged in"); return; }
-
-        const url = `${DOWNLOAD_ENDPOINT}?id=${encodeURIComponent(file.index || file.fileId)}`;
-
-        // Trigger download via fetch -> blob -> link
-        fetch(url, { method: "GET", headers: { "x-session-token": token } })
-          .then(resp => {
-            if (!resp.ok) return resp.json().then(j => Promise.reject(j));
-            return resp.blob();
-          })
-          .then(blob => {
-            const a = document.createElement("a");
-            a.href = URL.createObjectURL(blob);
-            a.download = file.name;
-            a.click();
-            debug.textContent = "Downloaded " + file.name;
-          })
-          .catch(err => {
-            console.error(err);
-            debug.textContent = "Download error: " + JSON.stringify(err);
-          });
-      });
-
-      newDiv.appendChild(downloadBtn);
-      filesDiv.appendChild(newDiv);
-    }
+window.downloadFile = async (id, name) => {
+  const token = store.get();
+  if (!token) return alert("Login required");
+  
+  log(`Downloading ${name}...`);
+  try {
+    const url = `${ENDPOINTS.download}?id=${encodeURIComponent(id)}`;
+    const res = await fetch(url, { headers: { "x-session-token": token } });
+    if (!res.ok) throw await res.json();
+    
+    const blob = await res.blob();
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = name;
+    link.click();
+    log(`Download complete: ${name}`);
+  } catch (e) {
+    log(`Download error: ${e.message || e}`);
   }
+};
+
+// --- Polling Logic ---
+function startPolling() {
+  stopPolling();
+  
+  // PC vs Mobile detection
+  const isMobile = window.innerWidth < 768;
+  const interval = isMobile ? 10000 : 2000;
+  
+  log(`Polling started: ${isMobile ? "Mobile (10s)" : "PC (2s)"}`);
+  
+  // Initial fetch
+  fetchFiles();
+  
+  pollTimer = setInterval(fetchFiles, interval);
+}
+
+function stopPolling() {
+  if (pollTimer) clearInterval(pollTimer);
+}
+
+// Handle resize to switch polling modes dynamicallly
+let resizeTimeout;
+window.addEventListener("resize", () => {
+  clearTimeout(resizeTimeout);
+  resizeTimeout = setTimeout(() => {
+    if (store.get()) startPolling();
+  }, 500);
 });
 
-updateUI();
+ui.refreshBtn.onclick = () => {
+  log("Manual refresh");
+  fetchFiles();
+};
+
+// Init
+updateAuthState();
 </script>
 </body>
 </html>
-
