@@ -593,8 +593,8 @@ input:checked + .slider:before { transform: translateX(22px); }
     }
 
     /* Hide the desktop "Glider" animation as it doesn't work horizontally easily */
-    .glider { display: none !important; }
-
+    /*.glider { display: none !important; }
+    */
     /* 4. SAVE BUTTON (Move to normal flow) */
     .sidebar > div[style*="margin-top:auto"] {
         margin-top: 10px !important;
