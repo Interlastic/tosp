@@ -1,16 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Server Manager</title>
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
     <div id="loginbtn" class="accountbtn">
         <div id="user-view" class="btn-content-normal" onclick="handleAuthClick()">
-            <img src="Discord_Logo.png" alt="Discord Logo" width="20" height="20" style="vertical-align:middle; margin-right:8px;">
+            <img src="Discord_Logo.png" alt="Discord Logo" width="20" height="20"
+                style="vertical-align:middle; margin-right:8px;">
             <span id="lbl-btn-username">User</span>
         </div>
         <div id="logout-view" class="btn-content-logout">
@@ -21,16 +24,16 @@
             </div>
         </div>
     </div>
-    <div id="logOutContainer" class="logOutContainer" onclick="closeLogout()"></div>
 
     <div id="view-settings" class="box settings-container">
-        
+
         <div class="sidebar">
             <div class="sidebar-header">
                 <button class="btn-back-icon" onclick="goBack()" title="Back to Dashboard">←</button>
                 <div>
                     <h3 style="margin:0 0 0 10px;">Settings</h3>
-                    <span id="lbl-server-id" style="font-size: 0.75rem; color:#aaa; margin-left: 10px;">Loading...</span>
+                    <span id="lbl-server-id"
+                        style="font-size: 0.75rem; color:#aaa; margin-left: 10px;">Loading...</span>
                 </div>
             </div>
 
@@ -42,15 +45,16 @@
                 <button class="nav-item" onclick="switchTab(this, 'tab-welcome')">Welcome & Bye</button>
                 <button class="nav-item" onclick="switchTab(this, 'tab-ai')">AI & Threads</button>
             </div>
-            
+
             <div style="margin-top:auto; padding:10px;">
-               <button id="btn-save-changes" class="btn-login" style="background:#3ba55c;" onclick="saveChanges()">Save Changes</button>
-               <p id="save-status" style="font-size:0.8rem; color:#aaa; text-align:center; margin-top:5px;"></p>
+                <button id="btn-save-changes" class="btn-login" style="background:#3ba55c;" onclick="saveChanges()">Save
+                    Changes</button>
+                <p id="save-status" style="font-size:0.8rem; color:#aaa; text-align:center; margin-top:5px;"></p>
             </div>
         </div>
 
         <div class="content-viewport">
-            
+
             <p id="loading-text" style="text-align:center; margin-top:50px; color:#aaa;">Loading Configuration...</p>
 
             <div id="tab-general" class="tab-pane active"></div>
@@ -64,7 +68,12 @@
         </div>
 
     </div>
+    <div id="logOutContainer" class="logOutContainer" onclick="closeLogout()"></div>
+
+    <!-- Transition Overlay: Starts active (black) -->
+    <div id="transition-overlay" class="page-transition-overlay active"></div>
 
     <script src="settings.js"></script>
 </body>
+
 </html>

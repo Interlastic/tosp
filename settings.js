@@ -13,6 +13,12 @@ function getCookie(n) { return (document.cookie.match(new RegExp('(^| )' + n + '
 
 // --- INITIALIZATION ---
 document.addEventListener('DOMContentLoaded', () => {
+    // Page Transition: Fade in from black
+    setTimeout(() => {
+        const overlay = document.getElementById('transition-overlay');
+        if (overlay) overlay.classList.remove('active');
+    }, 100); // Small delay to ensure render
+
     const token = getCookie("auth_token");
     if (!token) { window.location.href = "index.html"; return; }
 
@@ -21,6 +27,66 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const urlParams = new URLSearchParams(window.location.search);
     const serverId = urlParams.get('id');
+    const serverName = urlParams.get('name');
+    const serverIcon = urlParams.get('icon');
+    const serverWidth = urlParams.get('width'); // Get the width passed from previous page
+    const serverHeight = urlParams.get('height'); // Get height for position calc
+
+    // Render Static Card Header if data exists
+    if (serverName && serverIcon) {
+        // Create a floating card to match the animation end state
+        const floatCard = document.createElement('div');
+        floatCard.className = 'server-card';
+        // Match the end state: top:20px, left:20px, scale(0.6)
+        // We handle styling inline to ensure it overrides defaults or matches exactly
+        floatCard.style.position = 'fixed';
+
+        // Dynamic Position Logic
+        if (window.innerWidth <= 768) {
+            // Mobile: Bottom Left
+            // We need the original height to calculate the scaled height offset from bottom
+            // Formula: window.innerHeight - 20 - (height * 0.6)
+            const h = serverHeight ? parseFloat(serverHeight) : 80; // Fallback 80 if missing
+            const topPos = window.innerHeight - 20 - (h * 0.6);
+            floatCard.style.top = topPos + 'px';
+        } else {
+            // Desktop: Top Left
+            floatCard.style.top = '20px';
+        }
+
+        floatCard.style.left = '20px';
+        // Fix: Use the passed width, or fallback to 120px if missing. This ensures exact match with previous page.
+        floatCard.style.width = serverWidth ? (serverWidth + 'px') : '120px';
+        floatCard.style.transform = 'scale(0.6)';
+        floatCard.style.transformOrigin = 'top left'; // Important for scale to position correctly
+        floatCard.style.zIndex = '2000'; // Above everything
+        floatCard.style.margin = '0';
+        floatCard.style.cursor = 'default'; // No pointer
+        floatCard.style.pointerEvents = 'none'; // Let clicks pass through if needed, or 'auto'
+
+        // Remove hover effects if possible or override them
+        // We can't easily remove hover from class, but we can prevent animation
+        floatCard.style.animation = 'none';
+        floatCard.style.filter = 'none'; // Fix: Remove default blur from .server-card class
+        floatCard.style.webkitFilter = 'none';
+
+        floatCard.innerHTML = `
+            <img src="${decodeURIComponent(serverIcon)}" class="server-avatar" style="filter:blur(0); animation:none;">
+            <span>${decodeURIComponent(serverName)}</span>
+        `;
+
+        document.body.appendChild(floatCard);
+
+        // Hide the "Settings" text in sidebar to avoid clutter? 
+        // Or keep it. User didn't ask to remove it, but it might look overlapping.
+        // Let's hide the sidebar header text for cleaner look since the card is there (visually)
+        const headerDiv = document.querySelector('.sidebar-header');
+        if (headerDiv) headerDiv.style.visibility = 'hidden';
+        // Note: hiding the whole header might hide the Back button. 
+        // Let's just hide the H3 and span.
+        const headerTextDiv = document.querySelector('.sidebar-header > div');
+        if (headerTextDiv) headerTextDiv.style.visibility = 'hidden';
+    }
 
     if (serverId) {
         document.getElementById('lbl-server-id').innerText = serverId;

@@ -8,6 +8,10 @@
 }
 
 /* --- GLOBAL STYLES --- */
+* {
+    box-sizing: border-box;
+}
+
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background: var(--bg);
@@ -79,7 +83,9 @@ button:disabled {
     border-radius: 8px;
     border: 1px solid #444;
     cursor: pointer;
-    z-index: 999;
+    cursor: pointer;
+    z-index: 2000;
+    /* Ensure above dim overlay */
     width: 180px;
     height: 40px;
     overflow: hidden;
@@ -245,6 +251,10 @@ button:disabled {
     animation: unblurEntry 0.8s ease-out forwards;
 }
 
+/* .server-card:hover {
+    animation: goToCorner 0.8s ease-out forwards;
+} */
+
 .server-avatar {
     filter: blur(30px);
     -webkit-filter: blur(30px);
@@ -258,12 +268,30 @@ button:disabled {
     }
 }
 
+/* Go to top left of screen */
+@keyframes goToCorner {
+    0% {
+        position: absolute;
+    }
+
+    to {
+        left: 10px;
+        top: 10px;
+        transform: translate(0px, 0px);
+    }
+}
+
+.server-card:active {
+    animation: none;
+}
+
 
 .server-card:hover {
     background: #36393f;
     transform: translateY(-4px);
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
     border-color: var(--btn);
+    animation: unblurEntry 0.8s ease-out forwards;
 }
 
 .server-card img {
@@ -867,4 +895,61 @@ input:checked+.slider:before {
         /* Keep toggles side-by-side */
         align-items: center;
     }
+}
+
+/* Flying Card Animation Class */
+/* Flying Card Animation Class (Keyframe based) */
+.flying-card {
+    /* Set defaults if variables are missing */
+    --start-top: 0px;
+    --start-left: 0px;
+    --end-top: 20px;
+    /* Default to top */
+
+    transform-origin: top left !important;
+    /* Fix: Match settings.js static card origin */
+    position: fixed !important;
+    z-index: 1000 !important;
+    animation: flyToCorner 1.4s forwards !important;
+    pointer-events: none;
+    /* Reset transition as we are using animation now */
+    transition: none !important;
+}
+
+@keyframes flyToCorner {
+    0% {
+        top: var(--start-top);
+        left: var(--start-left);
+        transform: scale(1);
+    }
+
+    90% {
+        top: var(--end-top);
+        /* "ease-in-out" simulated by curve here if needed, but standard easing applies to keyframe */
+    }
+
+    100% {
+        top: var(--end-top);
+        left: 20px;
+        transform: scale(0.6);
+        /* Size becomes less */
+    }
+}
+
+.page-transition-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: #000;
+    z-index: 999;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 1.5s ease;
+}
+
+.page-transition-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
 }
