@@ -1,5 +1,5 @@
 const WORKER = "https://api.niteapiworker.workers.dev";
-let currentIndex = 0; 
+let currentIndex = 0;
 let GLOBAL_COMMANDS = [];
 
 // Store global data to access across tabs
@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const urlParams = new URLSearchParams(window.location.search);
     const serverId = urlParams.get('id');
-    
+
     if (serverId) {
         document.getElementById('lbl-server-id').innerText = serverId;
         initSettingsFlow(serverId, token);
@@ -45,13 +45,13 @@ async function initSettingsFlow(serverId, token) {
         while (attempts < 30) {
             attempts++;
             let res = await fetch(`${WORKER}/check-settings?t=${Date.now()}`, { headers: { "Authorization": token }, cache: "no-store" });
-            
+
             if (res.status === 200) {
                 const data = await res.json();
-                
+
                 GLOBAL_CHANNELS = data.channels || [];
                 GLOBAL_ROLES = data.roles || [];
-                GLOBAL_SETTINGS = data.settings || {}; 
+                GLOBAL_SETTINGS = data.settings || {};
                 GLOBAL_COMMANDS = data.commands || []; // <--- Capture commands
 
                 document.getElementById('loading-text').classList.add('hide');
@@ -89,20 +89,20 @@ function renderGeneral() {
 
     // Regenerate Mode (Dropdown)
     const regenOpts = [
-        {val: "0", txt: "Button Only (No Command)"},
-        {val: "1", txt: "Command Only (Default)"},
-        {val: "2", txt: "Reaction (Broken)"},
-        {val: "3", txt: "All (Button + Cmd + React)"},
-        {val: "4", txt: "Disabled"}
+        { val: "0", txt: "Button Only (No Command)" },
+        { val: "1", txt: "Command Only (Default)" },
+        { val: "2", txt: "Reaction (Broken)" },
+        { val: "3", txt: "All (Button + Cmd + React)" },
+        { val: "4", txt: "Disabled" }
     ];
     html += createSelect("regenerate_mode", "Regeneration Mode", regenOpts, s.regenerate_mode || "1");
 
     // Ping State (Dropdown)
     const pingOpts = [
-        {val: "1", txt: "Nite (Default)"},
-        {val: "4", txt: "Ask (Useful)"},
-        {val: "3", txt: "Think"},
-        {val: "2", txt: "Dream"}
+        { val: "1", txt: "Nite (Default)" },
+        { val: "4", txt: "Ask (Useful)" },
+        { val: "3", txt: "Think" },
+        { val: "2", txt: "Dream" }
     ];
     html += createSelect("ping_state", "Mention Behavior", pingOpts, s.ping_state || "1");
 
@@ -113,7 +113,7 @@ function renderGeneral() {
 function renderCommands() {
     const container = document.getElementById('tab-commands');
     const s = GLOBAL_SETTINGS;
-    
+
     let html = `
         <h2>Command Permissions</h2>
         <p style="color:#aaa; font-size:0.9rem; margin-bottom:20px;">
@@ -125,12 +125,12 @@ function renderCommands() {
         html += `<p style="color:#72767d;">No commands found or bot failed to send list.</p>`;
     } else {
         html += `<div class="commands-grid">`;
-        
+
         GLOBAL_COMMANDS.forEach(cmd => {
             const key = `${cmd.name}_enabled`;
             // Default to true if setting is missing (undefined)
-            const isEnabled = s[key] !== false; 
-            
+            const isEnabled = s[key] !== false;
+
             html += `
             <div class="command-card" style="display:flex; flex-direction:column; align-items:flex-start; gap:8px;">
                 <div style="display:flex; justify-content:space-between; width:100%; align-items:center;">
@@ -146,7 +146,7 @@ function renderCommands() {
 
         html += `</div>`;
     }
-    
+
     container.innerHTML = html;
 }
 
@@ -154,7 +154,7 @@ function renderCommands() {
 function renderWelcome() {
     const container = document.getElementById('tab-welcome');
     const s = GLOBAL_SETTINGS;
-    
+
     // Debugging: Check console to see what values we actually have
     console.log("Welcome Channel ID:", s.welcome_channel);
     console.log("Goodbye Channel ID:", s.goodbye_channel);
@@ -163,7 +163,7 @@ function renderWelcome() {
 
     // --- WELCOME ---
     html += `<div class="section-title">Welcome Messages</div>`;
-    
+
     let welcomeTxt = "";
     let welcomeEnabled = s.welcome_messages !== false;
     // Handle list vs string vs false
@@ -175,16 +175,16 @@ function renderWelcome() {
 
     html += createToggle("welcome_enabled_bool", "Enable Welcome Messages", "", welcomeEnabled);
     html += createTextarea("welcome_messages", "Messages", "Separate with | . Use {mention} for user.", welcomeTxt);
-    
+
     // PASS THE ID HERE
     html += createChannelSelect("welcome_channel", "Welcome Channel", s.welcome_channel);
-    
+
     html += createToggle("welcome_show_join_number", "Show Join Number", "e.g. 'Member #42'", s.welcome_show_join_number);
     html += createToggle("welcome_show_roles", "Show Roles", "Display assigned roles", s.welcome_show_roles);
 
     // --- GOODBYE ---
     html += `<div class="section-title">Goodbye Messages</div>`;
-    
+
     let goodbyeTxt = "";
     let goodbyeEnabled = s.goodbye_messages !== false;
     if (Array.isArray(s.goodbye_messages)) {
@@ -195,7 +195,7 @@ function renderWelcome() {
 
     html += createToggle("goodbye_enabled_bool", "Enable Goodbye Messages", "", goodbyeEnabled);
     html += createTextarea("goodbye_messages", "Messages", "Separate with |", goodbyeTxt);
-    
+
     // PASS THE ID HERE
     html += createChannelSelect("goodbye_channel", "Goodbye Channel", s.goodbye_channel);
 
@@ -211,7 +211,7 @@ function renderAI() {
     // Auto Flair
     html += `<div class="section-title">Auto Flair</div>`;
     html += createToggle("auto_flair_enabled", "Enable Auto Flair", "AI adds tags to new posts.", s.auto_flair_enabled);
-    
+
     let flairs = (s.auto_flair_options || ["Bug", "Suggestion"]).join(" | ");
     html += createTextarea("auto_flair_options", "Flair Options", "Separate with |", flairs);
 
@@ -222,10 +222,10 @@ function renderAI() {
     // Support Channels (Multi-select logic is complex in vanilla HTML, using simple input for IDs for now or a list)
     html += `<div class="section-title">Support Channels</div>`;
     html += `<p style="font-size:0.8rem; color:#aaa;">Select Forum Channels (IDs)</p>`;
-    
+
     // Render checkboxes for Forum channels
     const forums = GLOBAL_CHANNELS.filter(c => c.type === '15' || c.type === '13' || c.type === 'forum'); // Type 15 is Forum
-    if(forums.length === 0) {
+    if (forums.length === 0) {
         html += `<p style="color:#72767d; font-style:italic;">No Forum channels found.</p>`;
     } else {
         html += `<div class="commands-grid">`;
@@ -286,19 +286,19 @@ function createChannelSelect(id, label, selectedId) {
 
     // 2. Broaden Filter: Include Text (0) and News/Announcement (5)
     // The python script sends types as strings like "0", "5", etc.
-    const channels = GLOBAL_CHANNELS.filter(c => 
-        String(c.type) === '0' || 
-        String(c.type) === 'text' || 
-        String(c.type) === '5' || 
+    const channels = GLOBAL_CHANNELS.filter(c =>
+        String(c.type) === '0' ||
+        String(c.type) === 'text' ||
+        String(c.type) === '5' ||
         String(c.type) === 'news'
     );
 
     // 3. Check if the saved channel is actually in our list
     const found = channels.find(c => String(c.id) === targetId);
-    
+
     // 4. Build Options
     let opts = `<option value="">-- None --</option>`;
-    
+
     // If we have a saved ID but it wasn't found in the list (e.g. deleted channel or weird permission), 
     // add it as a "Unknown" option so the setting doesn't look empty.
     if (targetId && !found) {
@@ -311,7 +311,7 @@ function createChannelSelect(id, label, selectedId) {
         const isSelected = cId === targetId;
         return `<option value="${cId}" ${isSelected ? 'selected' : ''}># ${c.name}</option>`;
     }).join('');
-    
+
     return `
     <div class="form-group">
         <label class="form-label">${label}</label>
@@ -339,7 +339,7 @@ function switchTab(btn, targetId) {
 
 function moveGlider(targetBtn) {
     const glider = document.getElementById('nav-glider');
-    if(glider) {
+    if (glider) {
         glider.style.opacity = '1';
         glider.style.top = targetBtn.offsetTop + 'px';
         glider.style.height = targetBtn.offsetHeight + 'px';
@@ -350,7 +350,7 @@ function animateContent(oldTab, newTab, oldIdx, newIdx) {
     oldTab.classList.remove('active'); oldTab.classList.add('animating');
     newTab.classList.add('active'); newTab.classList.add('animating');
 
-    if (newIdx > oldIdx) { oldTab.classList.add('slide-out-up'); newTab.classList.add('slide-in-up'); } 
+    if (newIdx > oldIdx) { oldTab.classList.add('slide-out-up'); newTab.classList.add('slide-in-up'); }
     else { oldTab.classList.add('slide-out-down'); newTab.classList.add('slide-in-down'); }
 
     setTimeout(() => {
@@ -396,7 +396,7 @@ async function saveChanges() {
         const processMsgList = (toggleId, textId) => {
             const isEnabled = document.getElementById(toggleId).checked;
             if (!isEnabled) return false;
-            
+
             const rawText = document.getElementById(textId).value;
             // Split by pipe |, trim whitespace, remove empty entries
             return rawText.split('|').map(s => s.trim()).filter(s => s.length > 0);
@@ -407,7 +407,7 @@ async function saveChanges() {
         // Handle Channel ID: If empty string, send None/null, otherwise send ID string
         const wChan = document.getElementById('welcome_channel').value;
         payload.welcome_channel = wChan ? wChan : null;
-        
+
         payload.welcome_show_join_number = document.getElementById('welcome_show_join_number').checked;
         payload.welcome_show_roles = document.getElementById('welcome_show_roles').checked;
 
@@ -431,12 +431,12 @@ async function saveChanges() {
         const supportCheckboxes = document.querySelectorAll('.support-channel-chk:checked');
         // Map them to an array of integers (since your bot likely stores them as ints)
         // NOTE: If your bot expects strings for IDs in the list, remove parseInt
-        payload.support_channels = Array.from(supportCheckboxes).map(cb => parseInt(cb.value));
+        payload.support_channels = Array.from(supportCheckboxes).map(cb => cb.value);
 
 
         // --- 5. SEND TO WORKER ---
         status.innerText = "Sending to Bot...";
-        
+
         const response = await fetch(`${WORKER}/update-settings`, {
             method: 'POST',
             headers: {
@@ -452,7 +452,7 @@ async function saveChanges() {
         if (response.ok) {
             status.innerText = "Saved Successfully!";
             status.style.color = "#4fdc7b"; // Green
-            
+
             // Optional: Update global settings object with new values so UI doesn't flicker on refresh
             Object.assign(GLOBAL_SETTINGS, payload);
         } else {

@@ -13,7 +13,7 @@ const savedUser = getCookie("auth_user");
 if (getCookie("auth_token")) showDash(savedUser);
 
 function handleAuthClick() {
-    if(!getCookie("auth_token")) {
+    if (!getCookie("auth_token")) {
         openLogin();
     } else {
         openLogout();
@@ -34,7 +34,7 @@ window.addEventListener("message", e => {
 
 function showDash(u) {
     const lbl = document.getElementById('lbl-btn-username');
-    if(lbl) lbl.innerText = u || "User";
+    if (lbl) lbl.innerText = u || "User";
 
     document.getElementById('view-login').classList.add('hide');
     document.getElementById('view-dash').classList.remove('hide');
@@ -106,12 +106,15 @@ async function startFlow() {
 
 function renderServers(list) {
     const el = document.getElementById('server-list');
-    
+
     if (!list || list.length === 0) {
-        el.innerHTML = "<p>No servers found.</p>";
+        el.innerHTML = `<div class="server-card" onclick="window.location.href='https://discord.com/oauth2/authorize?client_id=1371513819104415804&permissions=2815042428980240&integration_type=0&scope=bot+applications.commands'">
+            <img src="plus.svg" alt="Nite" title="Nite" style="background-color: #202225;">
+            <span>Add to server</span>
+        </div>`;
         return;
     }
-    
+
     // Fallback image if picture_url is empty
     const defaultIcon = "https://cdn.discordapp.com/embed/avatars/0.png";
 
@@ -121,9 +124,13 @@ function renderServers(list) {
             <span>${s.name}</span>
         </div>
     `).join('');
+    el.innerHTML += `<div class="server-card" onclick="window.location.href='https://discord.com/oauth2/authorize?client_id=1371513819104415804&permissions=2815042428980240&integration_type=0&scope=bot+applications.commands'">
+            <img src="https://cdn.discordapp.com/avatars/1371513819104415804/9e038eeb716c24ece29276422b52cc80.webp?size=320" alt="Nite" title="Nite" style="background-color: #5865F2;stroke: #000000ff;stroke-width: 5px;">
+            <span>Add to server</span>
+        </div>`
 }
 
 
-document.addEventListener('DOMContentLoaded', 
+document.addEventListener('DOMContentLoaded',
     startFlow()
 )
