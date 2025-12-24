@@ -430,7 +430,7 @@ function animateContent(oldTab, newTab, oldIdx, newIdx) {
 async function saveChanges() {
     const btn = document.getElementById('btn-save-changes');
     const status = document.getElementById('save-status');
-    const serverId = document.getElementById('lbl-server-id').innerText;
+    const serverId = document.getElementById('lbl-server-id').textContent; // Fix: innerText is empty if hidden
     const token = getCookie("auth_token");
 
     if (!serverId || serverId === "Loading...") return;
