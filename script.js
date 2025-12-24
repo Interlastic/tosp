@@ -109,7 +109,7 @@ function renderServers(list) {
 
     if (!list || list.length === 0) {
         el.innerHTML = `<div class="server-card" onclick="window.location.href='https://discord.com/oauth2/authorize?client_id=1371513819104415804&permissions=2815042428980240&integration_type=0&scope=bot+applications.commands'">
-            <img src="plus.svg" alt="Nite" title="Nite" style="background-color: #202225;">
+            <img src="plus.svg" alt="Nite" class="server-avatar" title="Nite" style="background-color: #202225;">
             <span>Add to server</span>
         </div>`;
         return;
@@ -117,15 +117,14 @@ function renderServers(list) {
 
     // Fallback image if picture_url is empty
     const defaultIcon = "https://cdn.discordapp.com/embed/avatars/0.png";
-
-    el.innerHTML = list.map(s => `
-        <div class="server-card" onclick="window.location.href='manage.html?id=${s.id}'">
-            <img src="${s.picture_url || defaultIcon}" alt="${s.name}" title="${s.name}">
+    el.innerHTML = list.map((s, i) => `
+        <div class="server-card" onclick="window.location.href='manage.html?id=${s.id}'" style="animation-delay: ${i * 0.1}s;animation-duration: ${i * 0.1 + 0.4}s;">
+            <img src="${s.picture_url || defaultIcon}" class="server-avatar" alt="${s.name}" title="${s.name}" style="animation-delay: ${i * 0.1}s;animation-duration: ${i * 0.1}s;">
             <span>${s.name}</span>
         </div>
     `).join('');
     el.innerHTML += `<div class="server-card" onclick="window.location.href='https://discord.com/oauth2/authorize?client_id=1371513819104415804&permissions=2815042428980240&integration_type=0&scope=bot+applications.commands'">
-            <img src="https://cdn.discordapp.com/avatars/1371513819104415804/9e038eeb716c24ece29276422b52cc80.webp?size=320" alt="Nite" title="Nite" style="background-color: #5865F2;stroke: #000000ff;stroke-width: 5px;">
+            <img src="https://cdn.discordapp.com/avatars/1371513819104415804/9e038eeb716c24ece29276422b52cc80.webp?size=320" class="server-avatar" alt="Nite" title="Nite" style="background-color: #5865F2;stroke: #000000ff;stroke-width: 5px;">
             <span>Add to server</span>
         </div>`
 }
