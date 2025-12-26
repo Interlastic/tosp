@@ -294,23 +294,37 @@ async function refreshFileList() {
 }
 
 function renderFiles(list) {
+  // 1. Handle Empty State
   if (!list || list.length === 0) {
-    if (ui.fileList.childElementCount === 0 || ui.fileList.innerHTML.includes("No files")) {
-      ui.fileList.innerHTML = '<div style="text-align:center; padding:20px; color:#aaa">No files yet</div>';
-    }
+    ui.fileList.innerHTML = '<div style="text-align:center; padding:20px; color:#aaa">No files yet</div>';
     return;
   }
 
-  // Prevent flicker if count is same
-  if (ui.fileList.childElementCount === list.length) return;
+  // 2. Anti-Flicker: Compare IDs, not just counts
+  // If the number of items AND the first/last IDs are the same, skip re-rendering.
+  const currentItems = Array.from(ui.fileList.children);
+  const isPlaceholder = currentItems.length === 1 && currentItems[0].textContent.includes("No files");
+  
+  if (!isPlaceholder && currentItems.length === list.length) {
+    // fast check: if first and last IDs match, assume list is same (prevents UI flashing)
+    const firstId = list[0].fileID || list[0].fileId || list[0].index;
+    const lastId = list[list.length-1].fileID || list[list.length-1].fileId || list[list.length-1].index;
+    
+    const currentFirst = currentItems[0].getAttribute("data-id");
+    const currentLast = currentItems[currentItems.length-1].getAttribute("data-id");
+    
+    if (String(firstId) === currentFirst && String(lastId) === currentLast) return;
+  }
 
+  // 3. Render
   ui.fileList.innerHTML = "";
   list.forEach(file => {
-    // Prefer fileID, fallback to index
+    // Support multiple ID formats (D1 uses fileID, older uses fileId/index)
     const downloadId = file.fileID || file.fileId || file.index; 
     
     const el = document.createElement("div");
     el.className = "file-item";
+    el.setAttribute("data-id", downloadId); // Store ID for flicker check
     el.innerHTML = `
       <div class="file-name" title="${file.name}">${file.name}</div>
       <button class="secondary" onclick="downloadFile('${downloadId}', '${file.name}')">Download</button>
