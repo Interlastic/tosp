@@ -280,9 +280,11 @@ function init() {
     const savedToken = getCookie("auth_token");
 
     if (savedToken && savedUser) {
+        // 1. Update the UI to show the dashboard immediately
         updateDashUI(savedUser);
-        // Optional: Auto-fetch on load if you want
-        // fetchServers(); 
+        
+        // 2. Automatically start fetching servers
+        fetchServers(); 
     }
 }
 
